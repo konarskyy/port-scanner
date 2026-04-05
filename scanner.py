@@ -5,6 +5,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm  # <-- 1. import
 
+#biblioteka znanych portow i uslug
 KNOWN_PORTS = {
     21: "FTP", 22: "SSH", 23: "Telnet", 25: "SMTP",
     53: "DNS", 80: "HTTP", 110: "POP3", 143: "IMAP",
@@ -45,6 +46,7 @@ def main():
         print(f"Błąd: nie można rozwiązać adresu '{args.host}'")
         sys.exit(1)
 
+    #skanowanie z paskiem postępu
     print(f"\n{'='*50}")
     print(f" Cel:   {args.host} ({ip})")
     print(f" Porty: {args.start}–{args.end}")
@@ -57,7 +59,7 @@ def main():
     with ThreadPoolExecutor(max_workers=args.threads) as executor:
         futures = {executor.submit(scan_port, ip, p, args.timeout): p for p in ports}
 
-        # 2. owijamy futures w tqdm — on liczy ile już gotowych
+        # 2. owijanie futures w tqdm — on liczy ile już gotowych
         with tqdm(total=len(ports), desc="Skanowanie", unit="port",
               bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}]") as pbar:
 
@@ -70,6 +72,7 @@ def main():
                     tqdm.write(f"  [+] Port {result[0]:<6} {result[1]}")
                 pbar.update(1)  # <-- przesuwa pasek o 1
 
+    #podsumowanie wynikow
     open_ports.sort()
     print(f"\n{'='*50}")
     print(f" Znaleziono {len(open_ports)} otwartych portów")
